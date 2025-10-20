@@ -3,14 +3,29 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle } from "lucide-react";
 
-// Metadata för sidan (visas i flikens titel)
-export const metadata = {
-  title: "Tack!",
-};
+// ⚠️ OBS: Att exportera 'metadata' i en client-komponent visade sig orsakar build-fel i Next.js (App Router).
 
-// Tack-sida som visas efter att kontaktformuläret skickats.
+// Enkel inline-ikon (ersätter lucide-react för att undvika extra dependency i builden)
+function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      {...props}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <path d="M22 4 12 14.01l-3-3" />
+    </svg>
+  );
+}
+
+// Tacksida som visas efter att kontaktformuläret skickats.
 // Visar en bekräftelse och räknar automatiskt ner tills användaren skickas till startsidan.
 export default function ThanksPage() {
   const router = useRouter();
@@ -33,7 +48,7 @@ export default function ThanksPage() {
   return (
     <section className="flex flex-col items-center justify-center text-center space-y-6 py-24">
       {/* Ikon som ger visuell bekräftelse */}
-      <CheckCircle className="text-green-500 dark:text-green-400 w-16 h-16" />
+      <CheckIcon className="text-green-500 dark:text-green-400 w-16 h-16" />
 
       {/* Rubrik och kort meddelande */}
       <h1 className="text-3xl font-bold">Tack för ditt meddelande!</h1>
@@ -41,7 +56,7 @@ export default function ThanksPage() {
         Jag har mottagit ditt mejl och återkommer så snart jag kan 💌
       </p>
 
-      {/* Dynamisk nedräkning med feedback till användaren */}
+      {/* nedräkning */}
       <p className="text-sm text-gray-500 dark:text-gray-400">
         Du skickas tillbaka till startsidan om <b>{countdown}</b> sekunder...
       </p>
