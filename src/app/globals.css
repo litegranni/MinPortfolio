@@ -1,26 +1,81 @@
+/* --- Tailwind v4 --- */
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Plugins */
+@plugin "@tailwindcss/typography";
+
+/* ---------- Globala UI-justeringar ---------- */
+
+/* Typografi, gör inline-code mera lättläst, men lämnar code-block orört */
+.prose :where(code):not(:where([class~="not-prose"] *)) {
+  @apply bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded;
+}
+.prose pre code { @apply bg-transparent p-0; }
+
+/* Subtilt gridoverlay för bakgrunden (maskas i kanterna så det inte tar över) */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse at center, black 60%, transparent 100%);
+}
+.dark .bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Glaskort: lätt fade + transparent bakgrund */
+.card-glass {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+.dark .card-glass {
+  background: rgba(20, 20, 20, 0.5);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Rubrikstil (s.k hero-rubrik), gradient som klipps in i texten, med darkversionen */
+.h1-fancy {
+  @apply text-4xl md:text-5xl font-extrabold tracking-tight;
+  background-image: linear-gradient(120deg, #111 0%, #444 35%, #111 70%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;                  /* standard */
+  -webkit-text-fill-color: transparent;/* Safari/WebKit */
+}
+.dark .h1-fancy {
+  background-image: linear-gradient(120deg, #ffffff 0%, #cfd8ff 35%, #ffffff 70%);
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.06);
+}
+/* Fallback om background-clip inte stöds */
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .h1-fancy { color: #111; }
+  .dark .h1-fancy { color: #f5f7ff; }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Länk-understreck med enkel “slide in”-animation vid hover */
+.link-anim { position: relative; }
+.link-anim::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: -2px;
+  width: 100%; height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .22s ease;
+  opacity: .55;
+}
+.link-anim:hover::after { transform: scaleX(1); }
+
+/* basfärger för text så inget blir “osynligt” i dark mode */
+body { @apply text-gray-900; }
+html.dark body { @apply text-gray-100; }
+
+/* responsiv tweak för små skärmar */
+@media (max-width: 640px) {
+  nav { flex-direction: column; align-items: flex-start; gap: .5rem; }
 }
