@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState, useEffect } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { marked } from "marked";
 
@@ -12,15 +12,15 @@ type Project = {
   title: string;
   description: string;
   tags: string[];
-  updated: string;
-  logo: string;
-  githubUrl: string;
+  updated: string;    // YYYY-MM-DD
+  logo: string;       // ex: "/RankRoom.png"
+  githubUrl: string;  // ex: "https://github.com/litegranni/RankRoom"
   owner: string;
   repo: string;
   branch?: string;
 };
 
-/** Lokal data utan APIs */
+/** Lokal data – ingen API-route behövs */
 const PROJECTS: Project[] = [
   {
     id: 1,
@@ -120,7 +120,7 @@ function ReadmePreview({
 
         if (!okText) throw new Error("Hittade ingen README i repots rot.");
 
-        // marked.parse kan vara sync/async = vänta säkert
+        // marked.parse kan vara sync/async → vänta säkert
         const htmlMaybe = await Promise.resolve(marked.parse(okText));
         const html = typeof htmlMaybe === "string" ? htmlMaybe : String(htmlMaybe);
 
@@ -166,7 +166,8 @@ function ReadmePreview({
   );
 }
 
-export default function ProjectsPage() {
+/** Inre komponenten som använder useSearchParams – den ligger i en <Suspense>-boundary */
+function ProjectsInner() {
   const searchParams = useSearchParams();
   const paramQuery = searchParams.get("query") || "";
 
@@ -174,7 +175,7 @@ export default function ProjectsPage() {
   const [tag, setTag] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("updated");
 
-  // Synka globalt sök (från top-nav) till lokalt fält
+  // Synka globalt sök (från top-nav) → lokalt fält
   useEffect(() => {
     setQuery(paramQuery);
   }, [paramQuery]);
@@ -199,7 +200,7 @@ export default function ProjectsPage() {
   }, [query, tag, sortKey]);
 
   return (
-    <section className="space-y-6">
+    <>
       <div className="flex items-end justify-between gap-3 flex-wrap">
         <div>
           <h1 className="h1-fancy">Projekt</h1>
@@ -243,7 +244,7 @@ export default function ProjectsPage() {
         ))}
       </div>
 
-      {/* Kort lista */}
+      {/* Kort-lista */}
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((p) => (
           <li
@@ -299,6 +300,17 @@ export default function ProjectsPage() {
           </li>
         ))}
       </ul>
+    </>
+  );
+}
+
+/** Page-komponenten: lägger ProjectsInner i en Suspense-boundary */
+export default function ProjectsPage() {
+  return (
+    <section className="space-y-6">
+      <Suspense fallback={<p className="text-sm text-gray-600 dark:text-gray-300">Laddar…</p>}>
+        <ProjectsInner />
+      </Suspense>
     </section>
   );
 }
